@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS auth_tokens (
+
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+    driver_id BIGINT UNSIGNED NOT NULL,
+
+    token TEXT NOT NULL,
+
+    expires_at DATETIME NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX(driver_id)
+);

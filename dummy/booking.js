@@ -1,0 +1,20 @@
+{
+    "driver_id": 1,
+    "vehicle_id": 2,
+    "ride_type": "ride",
+    "pickup_address": "Ludhiana",
+    "pickup_city": "Ludhiana",
+    "pickup_latitude": 30.9010,
+    "pickup_longitude": 75.8573,
+    "drop_address": "Chandigarh",
+    "drop_city": "Chandigarh",
+    "drop_latitude": 30.7046,
+    "drop_longitude": 76.7179,
+    "distance_km": 105.5,
+    "estimated_duration_minutes": 130,
+    "fare": 1500,
+    "total_fare": 1500,
+    "payment_method": "cash",
+    "payment_status": "pending",
+    "booking_status": "pending"
+}
