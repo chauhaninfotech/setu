@@ -1,16 +1,30 @@
 const express = require("express");
 const cors = require('cors');
+const http = require("http");
+const { initSocket } = require("./socket");
 
 const app = express();
+
+app.use(express.json());
+
+const server = http.createServer(app);
+const io = initSocket(server);
+
+// const io = new Server(server, {
+//     cors: {
+//         origin: "*",
+//         methods: ["GET", "POST"]
+//     }
+// });
 
 
 app.use(cors({
   origin: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'driver-id'],
 }));
 
-app.use(express.json());
+
 
 const driverRoutes = require("./routes/drivers");
 const vehicleRoutes = require("./routes/vehicles");
@@ -27,8 +41,12 @@ app.use("/api", suggestionRoutes);
 app.use("/api", reportRoutes);
 app.use("/uploads",express.static("uploads"));
 
-// Start server
-app.listen(3000, async () => {
+
+
+
+
+
+server.listen(3000, '0.0.0.0', () => {
 
     console.log("🚀 Server running on http://localhost:3000");
 

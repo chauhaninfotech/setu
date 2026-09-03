@@ -10,8 +10,10 @@ const createSuggestion = async (req, res) => {
             message
         } = req.body;
 
+        const driverId = req.headers['driver-id'];
+
         // Driver ID should come from auth middleware
-        const driverId = 6
+   
             //req.user?.id ||
             //req.driver?.id;
 
@@ -64,10 +66,10 @@ const createSuggestion = async (req, res) => {
 // ===============================
 const getSuggestions = async (req, res) => {
     try {
-        const driverId =
-            req.user?.id ||
-            req.driver?.id;
+        const driverId = req.headers['driver-id'];
 
+        
+        
         let query = `
             SELECT
                 id,
@@ -102,7 +104,8 @@ const getSuggestions = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: "Suggestions fetched successfully",
-            data: rows
+            data: rows,
+          
         });
 
     } catch (error) {

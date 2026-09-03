@@ -11,9 +11,16 @@ const createReport = async (req, res) => {
             message
         } = req.body;
 
-        const driverId =
-            req.user?.id ||
-            req.driver?.id;
+        const driverId = req.headers["driver-id"];
+
+        console.log("CREATE REPORT DRIVER ID:", driverId);
+
+        if (!driverId) {
+            return res.status(401).json({
+                success: false,
+                message: "Driver ID is required"
+            });
+        }
 
         if (!message) {
             return res.status(400).json({
@@ -22,12 +29,10 @@ const createReport = async (req, res) => {
             });
         }
 
-        // Uploaded image
         let image = null;
 
         if (req.file) {
-            image =
-                `/uploads/reports/${req.file.filename}`;
+            image = `/uploads/reports/${req.file.filename}`;
         }
 
         const [result] = await db.query(
@@ -41,7 +46,7 @@ const createReport = async (req, res) => {
             )
             VALUES (?, ?, ?, ?, 'pending')`,
             [
-                driverId || null,
+                driverId,
                 froud_driver_number || null,
                 message,
                 image
@@ -51,10 +56,9 @@ const createReport = async (req, res) => {
         return res.status(201).json({
             success: true,
             message: "Report submitted successfully",
-
             data: {
                 id: result.insertId,
-                driver_id: driverId || null,
+                driver_id: driverId,
                 froud_driver_number:
                     froud_driver_number || null,
                 message,
@@ -64,10 +68,7 @@ const createReport = async (req, res) => {
         });
 
     } catch (error) {
-        console.error(
-            "CREATE REPORT ERROR:",
-            error
-        );
+        console.error("CREATE REPORT ERROR:", error);
 
         return res.status(500).json({
             success: false,
@@ -84,11 +85,24 @@ const createReport = async (req, res) => {
 // ===============================
 const getReports = async (req, res) => {
     try {
-        const driverId =
-            req.user?.id ||
-            req.driver?.id;
+        const driverId = req.headers["driver-id"];
 
-        let query = `
+
+        // --------------------------------
+        // DRIVER ID REQUIRED
+        // --------------------------------
+        if (!driverId) {
+            return res.status(401).json({
+                success: false,
+                message: "Driver ID is required"
+            });
+        }
+
+        // --------------------------------
+        // GET ONLY THIS DRIVER'S REPORTS
+        // --------------------------------
+        const [rows] = await db.query(
+            `
             SELECT
                 id,
                 driver_id,
@@ -100,28 +114,15 @@ const getReports = async (req, res) => {
                 created_at,
                 updated_at
             FROM reports
-        `;
-
-        const params = [];
-
-        if (driverId) {
-            query += `
-                WHERE driver_id = ?
-            `;
-
-            params.push(driverId);
-        }
-
-        query += `
+            WHERE driver_id = ?
             ORDER BY id DESC
-        `;
-
-        const [rows] = await db.query(
-            query,
-            params
+            `,
+            [driverId]
         );
 
-        // Add complete image URL
+        // --------------------------------
+        // IMAGE URL
+        // --------------------------------
         const baseUrl =
             `${req.protocol}://${req.get("host")}`;
 
@@ -140,10 +141,7 @@ const getReports = async (req, res) => {
         });
 
     } catch (error) {
-        console.error(
-            "GET REPORTS ERROR:",
-            error
-        );
+        console.error("GET REPORTS ERROR:", error);
 
         return res.status(500).json({
             success: false,

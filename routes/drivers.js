@@ -25,7 +25,7 @@ router.post("/driver/login", async (req, res) => {
                     email,
                     profile_photo,
                     status,
-                    availability_status,
+                    is_online,
                     phone_verified_at
              FROM drivers
              WHERE phone = ?
@@ -104,7 +104,7 @@ router.post("/drivers", async (req, res) => {
             license_expiry_date,
             license_document,
             status,
-            availability_status,
+            is_online,
             current_latitude,
             current_longitude,
             last_location_at
@@ -142,7 +142,7 @@ router.post("/drivers", async (req, res) => {
                 license_expiry_date,
                 license_document,
                 status,
-                availability_status,
+                is_online,
                 current_latitude,
                 current_longitude,
                 last_location_at
@@ -162,7 +162,7 @@ router.post("/drivers", async (req, res) => {
                 license_expiry_date || null,
                 license_document || null,
                 status || "pending",
-                availability_status || "offline",
+                is_online || 0,
                 current_latitude || null,
                 current_longitude || null,
                 last_location_at || null
@@ -185,7 +185,7 @@ router.post("/drivers", async (req, res) => {
                 license_expiry_date,
                 license_document,
                 status,
-                availability_status,
+                is_online,
                 current_latitude,
                 current_longitude,
                 last_location_at,
@@ -239,7 +239,7 @@ router.get("/drivers", async (req, res) => {
                 license_expiry_date,
                 license_document,
                 status,
-                availability_status,
+                is_online,
                 current_latitude,
                 current_longitude,
                 last_location_at,
@@ -286,7 +286,7 @@ router.get("/drivers/:id", async (req, res) => {
                 license_expiry_date,
                 license_document,
                 status,
-                availability_status,
+                is_online,
                 current_latitude,
                 current_longitude,
                 last_location_at,
@@ -342,7 +342,7 @@ router.put("/drivers/:id", async (req, res) => {
         license_expiry_date,
         license_document,
         status,
-        availability_status,
+        is_online,
         current_latitude,
         current_longitude,
         last_location_at
@@ -394,7 +394,7 @@ router.put("/drivers/:id", async (req, res) => {
                 license_expiry_date = ?,
                 license_document = ?,
                 status = ?,
-                availability_status = ?,
+                is_online = ?,
                 current_latitude = ?,
                 current_longitude = ?,
                 last_location_at = ?
@@ -415,7 +415,7 @@ router.put("/drivers/:id", async (req, res) => {
             license_expiry_date ?? null,
             license_document ?? null,
             status ?? "pending",
-            availability_status ?? "offline",
+            is_online ?? 0,
             current_latitude ?? null,
             current_longitude ?? null,
             last_location_at ?? null,
@@ -440,7 +440,7 @@ router.put("/drivers/:id", async (req, res) => {
                 license_expiry_date,
                 license_document,
                 status,
-                availability_status,
+                is_online,
                 current_latitude,
                 current_longitude,
                 last_location_at,
@@ -531,7 +531,7 @@ router.delete("/drivers/:id", async (req, res) => {
 
 router.post("/driver/register", async (req, res) => {
     try {
-        const { phone } = req.body;
+        const { name, phone } = req.body;
 
         if (!phone) {
             return res.status(400).json({
@@ -562,14 +562,15 @@ router.post("/driver/register", async (req, res) => {
 
         const [result] = await pool.execute(
             `INSERT INTO drivers (
+                name,
                 phone,
                 otp_code,
                 otp_expires_at,
                 status,
-                availability_status
+                is_online
             )
-            VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE), 'pending', 'offline')`,
-            [phone, otp]
+            VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE), 'approved', 0)`,
+            [name, phone, otp]
         );
 
         const [drivers] = await pool.execute(
@@ -580,7 +581,7 @@ router.post("/driver/register", async (req, res) => {
                     license_expiry_date,
                     license_document,
                     status,
-                    availability_status,
+                    is_online,
                     phone_verified_at,
                     created_at,
                     updated_at
@@ -635,7 +636,7 @@ router.post("/driver/verify-otp", async (req, res) => {
                     license_expiry_date,
                     license_document,
                     status,
-                    availability_status,
+                    is_online,
                     phone_verified_at
              FROM drivers
              WHERE phone = ?
@@ -712,7 +713,7 @@ router.post("/driver/verify-otp", async (req, res) => {
                 email: driver.email,
                 profile_photo: driver.profile_photo,
                 status: driver.status,
-                availability_status: driver.availability_status,
+                is_online: driver.is_online,
                 phone_verified: true,
                 token: token,
             }
@@ -736,7 +737,7 @@ router.post("/driver/logout", authenticateToken, async (req, res) => {
 
         await pool.execute(
             `UPDATE drivers
-             SET availability_status = 'offline'
+             SET is_online = 0
              WHERE id = ?`,
             [driverId]
         );
@@ -861,7 +862,7 @@ router.patch("/drivers/me", async (req, res) => {
                     date_of_birth, address, city,
                     driving_license_number, license_expiry_date,
                     license_document, status,
-                    availability_status,
+                    is_online,
                     current_latitude, current_longitude,
                     last_location_at, phone_verified_at,
                     created_at, updated_at
@@ -903,7 +904,7 @@ router.get("/drivers/me", async (req, res) => {
                     date_of_birth, address, city,
                     driving_license_number, license_expiry_date,
                     license_document, status,
-                    availability_status,
+                    is_online,
                     current_latitude, current_longitude,
                     last_location_at, phone_verified_at,
                     created_at, updated_at
