@@ -51,7 +51,12 @@ function initSocket(server) {
 
 module.exports = { initSocket };
 
-
+app.get("/", (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "SETU API is running"
+    });
+});
 const port = process.env.PORT || 3000;
 
 server.listen(port, "0.0.0.0", () => {
