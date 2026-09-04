@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const http = require("http");
-
+const { Server } = require("socket.io");
 
 const app = express();
 
@@ -11,24 +11,50 @@ const app = express();
 
 const corsOptions = {
     origin: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    methods: [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+        "OPTIONS"
+    ],
     allowedHeaders: [
         "Content-Type",
         "Authorization",
         "driver-id"
-    ],
-    credentials: false,
-    optionsSuccessStatus: 204
+    ]
 };
 
 app.use(cors(corsOptions));
 
-// Explicitly handle OPTIONS preflight
-app.options("*", cors(corsOptions));
+// Express 5 compatible wildcard
+app.options("/{*splat}", cors(corsOptions));
 
 app.use(express.json());
 
+// ==========================================
+// HTTP SERVER
+// ==========================================
+
 const server = http.createServer(app);
+
+// ==========================================
+// SOCKET.IO
+// ==========================================
+
+const io = new Server(server, {
+    cors: {
+        origin: true,
+        methods: ["GET", "POST"]
+    }
+});
+
+console.log("✅ Socket.IO initialized");
+
+// ==========================================
+// ROUTES
+// ==========================================
 
 const driverRoutes = require("./routes/drivers");
 const vehicleRoutes = require("./routes/vehicles");
@@ -44,29 +70,29 @@ app.use("/api", subscriptionRoutes);
 app.use("/api", suggestionRoutes);
 app.use("/api", reportRoutes);
 
+// ==========================================
+// UPLOADS
+// ==========================================
+
 app.use("/uploads", express.static("uploads"));
 
+// ==========================================
+// HEALTH CHECK
+// ==========================================
 
-const { Server } = require("socket.io");
-
-function initSocket(server) {
-    const io = new Server(server, {
-        cors: {
-            origin: true,
-            methods: ["GET", "POST"]
-        }
+app.get("/", (req, res) => {
+    res.json({
+        success: true,
+        message: "SETU API is running"
     });
+});
 
-    console.log("✅ Socket.IO initialized");
-
-    return io;
-}
-
-module.exports = { initSocket };
-
+// ==========================================
+// START
+// ==========================================
 
 const port = process.env.PORT || 3000;
 
 server.listen(port, "0.0.0.0", () => {
-    console.log(`Server running on port ${port}`);
+    console.log(`🚀 Server running on port ${port}`);
 });
