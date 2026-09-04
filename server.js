@@ -42,29 +42,11 @@ app.use("/api", reportRoutes);
 app.use("/uploads",express.static("uploads"));
 
 
+const port = process.env.PORT || 3000;
 
+server.listen(port, '0.0.0.0', () => {
 
-app.get("/webhook", (req, res) => {
-    const mode = req.query["hub.mode"];
-    const token = req.query["hub.verify_token"];
-    const challenge = req.query["hub.challenge"];
-
-    if (
-        mode === "subscribe" &&
-        token === process.env.WHATSAPP_VERIFY_TOKEN
-    ) {
-        console.log("WhatsApp webhook verified");
-
-        return res.status(200).send(challenge);
-    }
-
-    return res.sendStatus(403);
-});
-
-
-server.listen(3000, '0.0.0.0', () => {
-
-    console.log("Server running on http://192.168.1.66:3000");
+    console.log(`Server running on port ${port}`);
 
     // try {
 
