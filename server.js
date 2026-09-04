@@ -5,11 +5,41 @@ const http = require("http");
 
 const app = express();
 
-// CORS FIRST
+// ===============================
+// CORS
+// ===============================
+
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+
+    if (origin) {
+        res.header("Access-Control-Allow-Origin", origin);
+    }
+
+    res.header(
+        "Access-Control-Allow-Methods",
+        "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+    );
+
+    res.header(
+        "Access-Control-Allow-Headers",
+        "Content-Type, Authorization, driver-id"
+    );
+
+    res.header("Access-Control-Allow-Credentials", "true");
+
+    if (req.method === "OPTIONS") {
+        return res.sendStatus(204);
+    }
+
+    next();
+});
+
 app.use(cors({
     origin: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "driver-id"],
 }));
 
 
@@ -51,12 +81,7 @@ function initSocket(server) {
 
 module.exports = { initSocket };
 
-app.get("/", (req, res) => {
-    res.status(200).json({
-        success: true,
-        message: "SETU API is running"
-    });
-});
+
 const port = process.env.PORT || 3000;
 
 server.listen(port, "0.0.0.0", () => {
