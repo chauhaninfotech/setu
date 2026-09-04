@@ -5,43 +5,26 @@ const http = require("http");
 
 const app = express();
 
-// ===============================
+// ==========================================
 // CORS
-// ===============================
+// ==========================================
 
-app.use((req, res, next) => {
-    const origin = req.headers.origin;
-
-    if (origin) {
-        res.header("Access-Control-Allow-Origin", origin);
-    }
-
-    res.header(
-        "Access-Control-Allow-Methods",
-        "GET,POST,PUT,PATCH,DELETE,OPTIONS"
-    );
-
-    res.header(
-        "Access-Control-Allow-Headers",
-        "Content-Type, Authorization, driver-id"
-    );
-
-    res.header("Access-Control-Allow-Credentials", "true");
-
-    if (req.method === "OPTIONS") {
-        return res.sendStatus(204);
-    }
-
-    next();
-});
-
-app.use(cors({
+const corsOptions = {
     origin: true,
-    credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "driver-id"],
-}));
+    allowedHeaders: [
+        "Content-Type",
+        "Authorization",
+        "driver-id"
+    ],
+    credentials: false,
+    optionsSuccessStatus: 204
+};
 
+app.use(cors(corsOptions));
+
+// Explicitly handle OPTIONS preflight
+app.options("*", cors(corsOptions));
 
 app.use(express.json());
 
