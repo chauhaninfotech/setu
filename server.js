@@ -5,10 +5,23 @@ const { Server } = require("socket.io");
 
 const app = express();
 
-// ==========================================
-// CORS
-// ==========================================
+// DEBUG ALL REQUESTS
+app.use((req, res, next) => {
+    console.log("REQUEST:", req.method, req.originalUrl);
+    console.log("ORIGIN:", req.headers.origin);
+    console.log(
+        "ACCESS CONTROL METHOD:",
+        req.headers["access-control-request-method"]
+    );
+    console.log(
+        "ACCESS CONTROL HEADERS:",
+        req.headers["access-control-request-headers"]
+    );
 
+    next();
+});
+
+// CORS
 const corsOptions = {
     origin: true,
     methods: [
@@ -28,7 +41,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Express 5 compatible wildcard
 app.options("/{*splat}", cors(corsOptions));
 
 app.use(express.json());
